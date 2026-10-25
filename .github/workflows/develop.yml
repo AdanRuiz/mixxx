@@ -13,6 +13,11 @@ on:
       - "!main"
       - "![0-9].[0-9]"
   workflow_dispatch:
+    inputs:
+      platforms:
+        description: 'Platforms to build: "all" or artifacts_slug values such as "windows-win64"'
+        type: string
+        default: ""
 
 permissions:
   contents: read #  to fetch code (actions/checkout)
@@ -58,7 +63,8 @@ jobs:
       pull_request: ${{ github.event_name == 'pull_request' }}
 
   checks:
-    if: needs.stop-build.outputs.result == 'false'
+    # Long static analysis runs (clazy, clang-tidy, coverage) only upstream.
+    if: needs.stop-build.outputs.result == 'false' && github.repository == 'mixxxdj/mixxx'
     needs:
       - stop-build
     uses: ./.github/workflows/checks.yml
@@ -78,6 +84,8 @@ jobs:
     with:
       branch: ${{ github.head_ref || github.ref_name }}
       ref: ${{ github.ref }}
+      # Forks build only Windows x64 for development; releases build everything.
+      platforms: ${{ inputs.platforms || (github.repository == 'mixxxdj/mixxx' && 'all' || 'windows-win64') }}
 
   # This task is used as a probe for auto merge
   # In the future, it could also be used to perform a status update (e.g once the whole CI is passing + is ready for review, add a specific label such as `need review`)
