@@ -532,7 +532,7 @@ void VertexAVManager::slotPoll() {
         m_pEmitter->updateMix(mix.mix);
     }
     for (const vertexav::MixEvent& e : mix.events) {
-        m_pEmitter->event(e.name, -1, e.deck, e.data);
+        m_pEmitter->emitEvent(e.name, -1, e.deck, e.data);
     }
     const double crossfader = round3(m_pCrossfader->get());
     if (crossfader != m_sentCrossfader) {
@@ -623,11 +623,11 @@ void VertexAVManager::pollDeck(DeckState& deck, qint64 now) {
         upd[QStringLiteral("playing")] = playing;
         m_pEmitter->updateDeck(deck.number, upd);
         if (playing) {
-            m_pEmitter->event(QStringLiteral("track.start"), -1, deck.number);
+            m_pEmitter->emitEvent(QStringLiteral("track.start"), -1, deck.number);
         } else {
             const double duration = deck.track ? deck.track->getDuration() : 0.0;
             const bool atEnd = duration > 0 && deck.positionS >= duration - 0.5;
-            m_pEmitter->event(QStringLiteral("track.stop"),
+            m_pEmitter->emitEvent(QStringLiteral("track.stop"),
                     -1,
                     deck.number,
                     QJsonObject{{QStringLiteral("kind"),
@@ -640,7 +640,7 @@ void VertexAVManager::pollDeck(DeckState& deck, qint64 now) {
     }
     if (scratching != deck.scratching || slip != deck.slipActive) {
         if (scratching != deck.scratching) {
-            m_pEmitter->event(scratching ? QStringLiteral("scratch.start") : QStringLiteral("scratch.end"),
+            m_pEmitter->emitEvent(scratching ? QStringLiteral("scratch.start") : QStringLiteral("scratch.end"),
                     -1,
                     deck.number);
             if (!scratching) {
@@ -671,7 +671,7 @@ void VertexAVManager::pollDeck(DeckState& deck, qint64 now) {
                                    mixxx::audio::FramePos(outS * deck.sampleRate)) -
                     mixxx::vertexav::beatIndexAt(deck.beats, mixxx::audio::FramePos(inS * deck.sampleRate)));
         }
-        m_pEmitter->event(loopOn ? QStringLiteral("loop.on") : QStringLiteral("loop.off"),
+        m_pEmitter->emitEvent(loopOn ? QStringLiteral("loop.on") : QStringLiteral("loop.off"),
                 -1,
                 deck.number,
                 QJsonObject{{QStringLiteral("in_s"), round3(inS)},
@@ -692,7 +692,7 @@ void VertexAVManager::pollDeck(DeckState& deck, qint64 now) {
             if (!loopWrap) {
                 const double fromS = deck.positionS -
                         (deck.beat - deck.lastBeat) * 60.0 / std::max(1.0, deck.effectiveBpm) * deck.rate;
-                m_pEmitter->event(QStringLiteral("seek"),
+                m_pEmitter->emitEvent(QStringLiteral("seek"),
                         -1,
                         deck.number,
                         QJsonObject{{QStringLiteral("from_s"), round3(std::max(0.0, fromS))},
@@ -859,7 +859,7 @@ void VertexAVManager::scheduleSectionEvents(qint64 now) {
                 }
                 QString id;
                 if (n == 0) {
-                    id = m_pEmitter->event(QStringLiteral("section.change"),
+                    id = m_pEmitter->emitEvent(QStringLiteral("section.change"),
                             at,
                             pSrc->number,
                             QJsonObject{{QStringLiteral("from"), prev.role},
@@ -868,7 +868,7 @@ void VertexAVManager::scheduleSectionEvents(qint64 now) {
                                     {QStringLiteral("energy"), sec.energy}});
                 } else {
                     const qint64 targetAt = m_pTempo->timeOfBeat(sec.startBeat + m_masterOffset);
-                    id = m_pEmitter->event(QStringLiteral("countdown"),
+                    id = m_pEmitter->emitEvent(QStringLiteral("countdown"),
                             at,
                             pSrc->number,
                             QJsonObject{{QStringLiteral("target"), sec.role},

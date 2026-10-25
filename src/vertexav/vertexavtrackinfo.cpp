@@ -226,7 +226,8 @@ TrackInfo buildTrackInfo(const TrackPointer& pTrack) {
     meta[QStringLiteral("album")] = pTrack->getAlbum();
     meta[QStringLiteral("genre")] = pTrack->getGenre();
     bool yearOk = false;
-    const int year = pTrack->getYear().left(4).toInt(&yearOk);
+    const QString yearText = pTrack->getYear();
+    const int year = QStringView(yearText).left(4).toInt(&yearOk);
     meta[QStringLiteral("year")] = yearOk ? QJsonValue(year) : QJsonValue();
     meta[QStringLiteral("duration_s")] = pTrack->getDuration();
     meta[QStringLiteral("bpm")] = bpm > 0 ? QJsonValue(bpm) : QJsonValue();
@@ -279,7 +280,8 @@ TrackInfo buildTrackInfo(const TrackPointer& pTrack) {
     // Sections from cues: DJ-labelled hotcues first, then intro/outro markers (§11.2).
     QVector<Boundary> boundaries;
     QJsonArray markers;
-    for (const CuePointer& pCue : pTrack->getCuePoints()) {
+    const QList<CuePointer> cues = pTrack->getCuePoints();
+    for (const CuePointer& pCue : cues) {
         if (!pCue) {
             continue;
         }
