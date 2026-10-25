@@ -18,6 +18,9 @@ class BroadcastManager;
 #endif
 class ControllerManager;
 class VinylControlManager;
+#ifdef __VERTEXAV__
+class VertexAVManager;
+#endif
 class TrackCollectionManager;
 class Library;
 class SkinControls;
@@ -136,6 +139,9 @@ class CoreServices : public QObject {
     std::shared_ptr<ControllerManager> m_pControllerManager;
 
     std::shared_ptr<VinylControlManager> m_pVCManager;
+#ifdef __VERTEXAV__
+    std::shared_ptr<VertexAVManager> m_pVertexAVManager;
+#endif
 
     std::shared_ptr<DbConnectionPool> m_pDbConnectionPool;
     std::shared_ptr<TrackCollectionManager> m_pTrackCollectionManager;

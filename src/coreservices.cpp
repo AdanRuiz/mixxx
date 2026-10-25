@@ -30,6 +30,9 @@
 #include "library/trackcollectionmanager.h"
 #include "mixer/playerinfo.h"
 #include "mixer/playermanager.h"
+#ifdef __VERTEXAV__
+#include "vertexav/vertexavmanager.h"
+#endif
 #include "moc_coreservices.cpp"
 #include "preferences/dialog/dlgpreferences.h"
 #include "preferences/settingsmanager.h"
@@ -780,6 +783,10 @@ void CoreServices::initialize(QApplication* pApp) {
     // them on startup.
     m_pSkinControls = std::make_unique<SkinControls>();
 
+#ifdef __VERTEXAV__
+    m_pVertexAVManager = std::make_shared<VertexAVManager>(pConfig, m_pPlayerManager);
+#endif
+
     // Load tracks in args.qlMusicFiles (command line arguments) into player
     // 1 and 2:
     const QList<QString>& musicFiles = m_cmdlineArgs.getMusicFiles();
@@ -929,6 +936,12 @@ void CoreServices::finalize() {
     ControllerScriptEngineBase::registerTrackCollectionManager(nullptr);
 #endif
     ControllerScriptEngineBase::registerPlayerManager(nullptr);
+
+#ifdef __VERTEXAV__
+    // Says goodbye to lighting/visuals receivers before the decks go away.
+    qDebug() << t.elapsed(false).debugMillisWithUnit() << "deleting VertexAVManager";
+    m_pVertexAVManager.reset();
+#endif
 
     // Stop all pending library operations
     qDebug() << t.elapsed(false).debugMillisWithUnit() << "stopping pending Library tasks";

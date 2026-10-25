@@ -40,6 +40,10 @@
 #include "preferences/dialog/dlgprefbroadcast.h"
 #endif // __BROADCAST__
 
+#ifdef __VERTEXAV__
+#include "preferences/dialog/dlgprefvertexav.h"
+#endif // __VERTEXAV__
+
 #include "preferences/dialog/dlgprefbeats.h"
 #include "preferences/dialog/dlgprefkey.h"
 #include "preferences/dialog/dlgprefrecord.h"
@@ -219,6 +223,14 @@ DlgPreferences::DlgPreferences(
             tr("Live Broadcasting"),
             "ic_preferences_broadcast.svg");
 #endif // __BROADCAST__
+
+#ifdef __VERTEXAV__
+    addPageWidget(PreferencesPage(
+                          new DlgPrefVertexAV(this, m_pConfig),
+                          new QTreeWidgetItem(contentsTreeWidget, QTreeWidgetItem::Type)),
+            tr("VertexAV Link"),
+            "ic_preferences_broadcast.svg");
+#endif // __VERTEXAV__
 
     addPageWidget(PreferencesPage(
                           new DlgPrefRecord(this, m_pConfig),
